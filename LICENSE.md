@@ -1,3 +1,12 @@
+The DGA Software Package is developed by the following authors:
+
+Ibrahim B. M. Taha, Tanta University
+Saleh I. M. Ibrahim, Cairo University 
+Sherif S. M. Ghoneim, Suez University
+
+This work is provided under the CC BY-NC 4.0 License
+https://creativecommons.org/licenses/by-nc/4.0/
+
 Creative Commons Attribution-NonCommercial 4.0 International Public License
 
 By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
