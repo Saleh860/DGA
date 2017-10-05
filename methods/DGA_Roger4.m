@@ -1,7 +1,3 @@
-function Diagnosis=DGA_Roger4(ratios)
-
-    h2=ratios(1);ch4=ratios(2);c2h6=ratios(3);c2h4=ratios(4);c2h2=ratios(5);
-
     R1=ch4/h2;
     R2=c2h6/ch4;
     R3=c2h4/c2h6;
@@ -103,4 +99,3 @@ function Diagnosis=DGA_Roger4(ratios)
        elseif NO_OF_STATE==13
        Diagnosis=1;
     end 
-end

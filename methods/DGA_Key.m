@@ -1,6 +1,3 @@
-function Diagnosis=DGA_Key(ratios)
-
-    h2=ratios(1);ch4=ratios(2);c2h6=ratios(3);c2h4=ratios(4);c2h2=ratios(5);
 
     t=h2+ch4+c2h2+c2h6+c2h4;
    
@@ -45,20 +42,7 @@ function Diagnosis=DGA_Key(ratios)
     else 
          key=7;
     end
+    
     Diagnosis=key;
-end
-        
 
-
-
-        
-
-    
-    
-    
-    
-    
-    
-    
-    
     

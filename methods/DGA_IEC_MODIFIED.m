@@ -1,11 +1,3 @@
-function DIG_IEC_MOD=DGA_IEC_MODIFIED(data)
-
-h2=data(1);  % Gas Concentrations  
-ch4=data(2);  
-c2h6=data(3); 
-c2h4=data(4); 
-c2h2=data(5); 
-ACT=data(6);
 
 % IEC RATIO METHOD
 R1I=c2h2/c2h4;  
@@ -99,4 +91,4 @@ elseif STATE_IEC==2
     DIG_IEC_MOD=7;
 end
 
-end
+Diganosis  =DIG_IEC_MOD;

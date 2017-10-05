@@ -1,6 +1,3 @@
-function Diagnosis=DGA_IEC(ratios)
-
-    h2=ratios(1);ch4=ratios(2);c2h6=ratios(3);c2h4=ratios(4);c2h2=ratios(5);
 
     R2=ch4/h2;
     R3=c2h4/c2h6;
@@ -64,28 +61,30 @@ function Diagnosis=DGA_IEC(ratios)
        Diagnosis=0;
     elseif NO_OF_STATE==2
        Diagnosis=7;
-       elseif NO_OF_STATE==3
+    elseif NO_OF_STATE==3
        Diagnosis=1;
-       elseif NO_OF_STATE==4
+    elseif NO_OF_STATE==4
        Diagnosis=4;
-       elseif NO_OF_STATE==5
+    elseif NO_OF_STATE==5
        Diagnosis=4;
-       elseif NO_OF_STATE==6
+    elseif NO_OF_STATE==6
        Diagnosis=4;
-       elseif NO_OF_STATE==7
+    elseif NO_OF_STATE==7
        Diagnosis=5;
-      elseif NO_OF_STATE==8
+    elseif NO_OF_STATE==8
        Diagnosis=5;
-       elseif NO_OF_STATE==9
+    elseif NO_OF_STATE==9
        Diagnosis=6;
-       elseif NO_OF_STATE==10
+    elseif NO_OF_STATE==10
        Diagnosis=2;
-       elseif NO_OF_STATE==11
+    elseif NO_OF_STATE==11
        Diagnosis=3;
-       elseif NO_OF_STATE==12
+    elseif NO_OF_STATE==12
        Diagnosis=3;
-       elseif NO_OF_STATE==13
+    elseif NO_OF_STATE==13
        Diagnosis=1;
+    else
+       Diagnosis=0;
     end 
-end
+
    

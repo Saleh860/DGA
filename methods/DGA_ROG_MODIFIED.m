@@ -1,11 +1,3 @@
-function DIG_R_MOD=DGA_ROG_MODIFIED(data)
-
-h2=data(1); % Gas Concentrations 
-ch4=data(2);  
-c2h6=data(3); 
-c2h4=data(4); 
-c2h2=data(5); 
-ACT=data(6);
 
 % ROGER 4 RATIO MODIFIED NEW
 R1=ch4/h2;  
@@ -234,4 +226,4 @@ elseif STATE_ROGER==2
     DIG_R_MOD=7;
 end
 
-end
+Diagnosis = DIG_R_MOD;

@@ -1,5 +1,3 @@
-function Diagnosis=DGA_Cond_Prob(ratios)
-    h2=ratios(1);ch4=ratios(2);c2h6=ratios(3);c2h4=ratios(4);c2h2=ratios(5);
 
     ratios(1)=ratios(1)/(sum(ratios((1:5))));
     ratios(2)=ratios(2)/(sum(ratios((1:5))));
@@ -64,4 +62,3 @@ function Diagnosis=DGA_Cond_Prob(ratios)
           end 
           
        Diagnosis = DIG;
-end

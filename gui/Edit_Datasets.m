@@ -12,7 +12,7 @@ function varargout = Edit_Datasets(varargin)
 %      EDIT_DATASETS('Property','Value',...) creates a new EDIT_DATASETS or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
 %      applied to the GUI before Edit_Datasets_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
+%      unrecognized property tbdatasetname or invalid value makes property application
 %      stop.  All inputs are passed to Edit_Datasets_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
@@ -22,7 +22,7 @@ function varargout = Edit_Datasets(varargin)
 
 % Edit the above text to modify the response to help Edit_Datasets
 
-% Last Modified by GUIDE v2.5 26-Mar-2017 08:26:59
+% Last Modified by GUIDE v2.5 03-Oct-2017 05:45:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,6 +61,16 @@ guidata(hObject, handles);
 % UIWAIT makes Edit_Datasets wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+%Read config file and fill in the methods list
+global DGA_Datasets;
+global DGA_DatasetSelectedIndex;
+[n,t,DGA_Datasets] = xlsread('Config.xlsx', 'Datasets');
+DGA_Datasets=DGA_Datasets(2:size(DGA_Datasets,1),:);
+set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
+set(handles.lbDatasets, 'Max', size(DGA_Datasets,1));
+DGA_DatasetSelectedIndex=0;
+LoadDatasetDetails(handles);
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = Edit_Datasets_OutputFcn(hObject, eventdata, handles) 
@@ -73,19 +83,40 @@ function varargout = Edit_Datasets_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-% --- Executes on selection change in listbox1.
-function listbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
+% --- Executes on selection change in lbDatasets.
+function lbDatasets_Callback(hObject, eventdata, handles)
+% hObject    handle to lbDatasets (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns listbox1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from listbox1
+% Hints: contents = cellstr(get(hObject,'String')) returns lbDatasets contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from lbDatasets
+SaveDatasetDetails(handles);
+LoadDatasetDetails(handles);
+
+function LoadDatasetDetails(handles)
+    global DGA_Datasets;
+    global DGA_DatasetSelectedIndex
+    DGA_DatasetSelectedIndex=get(handles.lbDatasets,'Value');
+    set(handles.tbDatasetName, 'String', DGA_Datasets(DGA_DatasetSelectedIndex, 2));
+    set(handles.tbFileName, 'String', DGA_Datasets(DGA_DatasetSelectedIndex, 3));
+    set(handles.tbReference,'String', DGA_Datasets(DGA_DatasetSelectedIndex, 4));     
+
+
+function SaveDatasetDetails(handles)
+    global DGA_Datasets;
+    global DGA_DatasetSelectedIndex
+    if DGA_DatasetSelectedIndex>0 && size(DGA_Datasets,1)>=DGA_DatasetSelectedIndex
+        DGA_Datasets(DGA_DatasetSelectedIndex, 2)=get(handles.tbDatasetName, 'String');
+        DGA_Datasets(DGA_DatasetSelectedIndex, 3)=get(handles.tbFileName, 'String');
+        DGA_Datasets(DGA_DatasetSelectedIndex, 4)={strjoin(get(handles.tbReference,'String')','\n')};
+        set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
+    end
 
 
 % --- Executes during object creation, after setting all properties.
-function listbox1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
+function lbDatasets_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to lbDatasets (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -96,8 +127,177 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
+% --- Executes on button press in pbAddDataset.
+function pbAddDataset_Callback(hObject, eventdata, handles)
+% hObject    handle to pbAddDataset (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+    global DGA_Datasets;
+    global DGA_DatasetSelectedIndex;
+    
+    SaveDatasetDetails(handles);
+    
+    if size(DGA_Datasets,1)>0
+        lastID=cell2mat(DGA_Datasets(size(DGA_Datasets,1),1));
+        newID=lastID+1;
+    else
+        newID=1;
+    end
+    
+    DGA_DatasetSelectedIndex=size(DGA_Datasets,1)+1;
+    DGA_Datasets(DGA_DatasetSelectedIndex,:)= {newID, 'New Dataset', 'Choose source file', ' '};
+    set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
+    set(handles.lbDatasets, 'Value', DGA_DatasetSelectedIndex);
+    LoadDatasetDetails(handles);
+    
+
+% --- Executes during object creation, after setting all properties.
+function tbDatasetName_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to tbDatasetName (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function tbReference_Callback(hObject, eventdata, handles)
+% hObject    handle to tbReference (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of tbReference as text
+%        str2double(get(hObject,'String')) returns contents of tbReference as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function tbReference_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to tbReference (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pbBrowse.
+function pbBrowse_Callback(hObject, eventdata, handles)
+% hObject    handle to pbBrowse (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+[filename,pathname]=uigetfile({'.xlsx'},'Select Input File (*.xlsx)');
+if ~isequal(filename,0) && ~isequal(pathname,0)
+    rel_path = relativepath(pathname);
+    fullname = strcat(rel_path, filename);
+    set(handles.tbFileName,'String',{fullname});
+end
+
+
+
+function tbFileName_Callback(hObject, eventdata, handles)
+% hObject    handle to tbFileName (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of tbFileName as text
+%        str2double(get(hObject,'String')) returns contents of tbFileName as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function tbFileName_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to tbFileName (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pbRemoveDataset.
+function pbRemoveDataset_Callback(hObject, eventdata, handles)
+% hObject    handle to pbRemoveDataset (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    global DGA_Datasets;
+    global DGA_DatasetSelectedIndex;
+    
+    if size(DGA_Datasets,1)>=1
+        DGA_DatasetSelectedIndex=get(handles.lbDatasets, 'Value');
+        DGA_Datasets(DGA_DatasetSelectedIndex,:)= [];
+
+        if size(DGA_Datasets,1)==0
+            pbAddDataset_Callback(hObject, eventdata, handles)
+        else
+            if size(DGA_Datasets,1)<DGA_DatasetSelectedIndex
+                DGA_DatasetSelectedIndex=size(DGA_Datasets,1);
+                set(handles.lbDatasets, 'Value', DGA_DatasetSelectedIndex);
+            end
+            set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
+            LoadDatasetDetails(handles);
+        end
+    end
+ 
+
+% --- Executes during object deletion, before destroying properties.
+function figure1_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    global DGA_Datasets;
+    global DGA_DatasetSelectedIndex;
+
+    drawnow
+    SaveDatasetDetails(handles);
+    
+    response= questdlg('Do you want to save changes?');
+    if strcmp(response,'Yes')
+        xlswrite('Config.xlsx',zeros(1000,10)*NaN, 'Datasets');
+        xlswrite('Config.xlsx',[{'ID','Name','Filename','Reference'};DGA_Datasets], 'Datasets');
+    end
+    if ~strcmp(response,'Cancel')
+        clear DGA_Datasets;
+        clear DGA_DatasetSelectedIndex;
+        delete(hObject);
+    end
+
+
+% --- Executes on button press in pbClose.
+function pbClose_Callback(hObject, eventdata, handles)
+% hObject    handle to pbClose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    close(handles.figure1);
+
+
+% --- Executes on key press with focus on tbDatasetName and none of its controls.
+function tbDatasetName_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to tbDatasetName (see GCBO)
+% eventdata  structure with the following fields (see UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+    drawnow
+    if strcmp(eventdata.Key,'return')
+        SaveDatasetDetails(handles);
+    end
