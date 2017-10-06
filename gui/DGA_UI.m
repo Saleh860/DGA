@@ -22,7 +22,7 @@ function varargout = DGA_UI(varargin)
 
     % Edit the above text to modify the response to help DGA_UI
 
-    % Last Modified by GUIDE v2.5 05-Oct-2017 01:27:46
+    % Last Modified by GUIDE v2.5 06-Oct-2017 01:22:00
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -112,27 +112,26 @@ function ratio1_CreateFcn(hObject, eventdata, handles)
     SetDefaultBackgroundColor(hObject);
 end
 
-% --- Executes on button press in SinglePointButton.
-function SinglePointButton_Callback(hObject, eventdata, handles)
-% hObject    handle to SinglePointButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-    % Hint: get(hObject,'Value') returns toggle state of SinglePointButton
-    choice=get(hObject,'Value');
-    if choice==1
-        set(handles.DatasetsPanel, 'visible', 'off')
-        set(handles.SinglePointPanel, 'visible', 'on')
-    else
-        set(handles.DatasetsPanel, 'visible', 'on')
-        set(handles.SinglePointPanel, 'visible', 'off')
-    end
-end
-
 % --- Select All Methods
 function SelectAllMethodsButton_Callback(hObject, eventdata, handles)
     methods = get(handles.MethodList, 'String');
     set(handles.MethodList, 'Value', 1:length(methods));
+end
+
+function SetDiagnosisTableHeader(handles, Header)
+    set(handles.DiagnosisTable, 'ColumnName', Header);
+end
+
+function Header = GetDiagnosisTableHeader(handles)
+    Header=get(handles.DiagnosisTable, 'ColumnName');
+end
+
+function SetDiagnosisTableData(handles, ratiosx)
+    set(handles.DiagnosisTable, 'Data', ratiosx);
+end
+
+function data=GetDiagnosisTableData(handles)
+    data =get(handles.DiagnosisTable, 'Data');
 end
 
 % --- DGA for single point entered using textboxes
@@ -166,12 +165,11 @@ function SinglePointDiagnosis(handles)
     FullColumns = find(~isnan(ratios(1,:)));
 
     selectedMethods = methods(get(handles.MethodList, 'Value'),2);
-    set(handles.DiagnosisTable, 'RowName', ...
-        [Input(FullColumns)
+    SetDiagnosisTableHeader(handles, [Input(FullColumns)
          selectedMethods]);
      
-    set(handles.DiagnosisTable, 'Data', ...
-        [num2cell(ratios(:,FullColumns)) symbolicResults]');
+    SetDiagnosisTableData(handles, ...
+        [num2cell(ratios(:,FullColumns)) symbolicResults]);
         
     set(handles.RawDataView, 'Value', 1);
     
@@ -192,9 +190,13 @@ function GoButton_Callback(hObject, eventdata, handles)
         msgbox('You must first choose at least one DGA method', 'modal');
         return
     end
+    if size(get(handles.lbDatasets, 'Value'),1)==0
+        msgbox('You must first choose at least one dataset', 'modal');
+        return
+    end
 
     % Single Point
-    if isequal(get(handles.SinglePointButton, 'Value'),1)    
+    if isequal(get(handles.optSinglePoint, 'Value'),1)    
         
         SinglePointDiagnosis(handles);
 
@@ -256,7 +258,7 @@ function [ratios, actual]=CombineSelectedDatasets(handles, selectedDatasets)
 end
 
 function UpdateProgressSlider(handle, maximum, current)
-    set(handle, 'Slider', [0.01; 100*(current/maximum)^6]);
+    set(handle, 'Slider', [0.01; max(0.01, 100*(current/maximum)^6)]);
     drawnow
 end
 
@@ -289,8 +291,9 @@ function DatasetDiagnosis(handles)
     FullColumns = find(~isnan(ratios(1,:)));
 
     selectedMethods = methods(get(handles.MethodList, 'Value'),2);
-    set(handles.DiagnosisTable, 'RowName', [Input(FullColumns); 'ACT'; selectedMethods]);
-    set(handles.DiagnosisTable, 'Data', [num2cell(ratios(:,FullColumns)) symbolicActual symbolicResults]');
+    SetDiagnosisTableHeader(handles,[Input(FullColumns); 'ACT'; selectedMethods]);
+    SetDiagnosisTableData(handles, ...
+        [num2cell(ratios(:,FullColumns)) symbolicActual symbolicResults]);
 
     DGA_histogram = AnalyzeResults(results, actual);
 
@@ -320,8 +323,8 @@ function PlotAccuracyGraph1(handles)
 
     grid on;
 
-    set(handles.AccuracyGraph,'XTickLabel', ...
-        {'PD','D1','D2','T1','T2','T3','Agree'});
+    set(gca,'XTickLabel', ...
+        {'PD','D1','D2','T1','T2','T3','Overall'});
 
     ylim([0 100]);    
 
@@ -406,9 +409,9 @@ end
 
 % --- Executes on button press in pbExportView.
 function pbExportView_Callback(hObject, eventdata, handles)
-% hObject    handle to pbExportView (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
+    warning('off', 'MATLAB:xlswrite:AddSheet');
+
     if get(handles.RawDataView, 'Value')
         ExportDiagnosisTable(handles);
     end
@@ -421,27 +424,38 @@ function pbExportView_Callback(hObject, eventdata, handles)
         ExportGraph(handles);
     end
     
+    warning('on', 'MATLAB:xlswrite:AddSheet');
     
 end
 
 
 function ExportDiagnosisTable(handles)
-    rowHeaders = get(handles.DiagnosisTable, 'RowName'); 
+    colHeaders = GetDiagnosisTableHeader(handles); 
 
-    data=get(handles.DiagnosisTable, 'data');
+    data=GetDiagnosisTableData(handles);
 
     if ~iscell(data)
         data = num2cell(data);
     end
 
 
-    Table = [rowHeaders, data];
+    Table = [colHeaders'
+             data];
 
     filename = 'DiagnosisTable.xlsx';
-    xlswrite(filename,zeros(1000,1000)*NaN, 'Data');
-    xlswrite(filename, Table, 'Data');
     
-    msgbox(['Data saved to ' filename]);
+    [filename,pathname]=uiputfile({'*.xlsx;*.xls', 'All supported files';'*.xlsx', 'Excel Workbook 2007';'*.xls', 'Excel Workbook 2003'},'Select Export File',filename);
+    if ~isequal(filename,0) && ~isequal(pathname,0)
+        rel_path = relativepath(pathname);
+        filename = strcat(rel_path, filename);
+        if exist(filename) 
+            delete(filename)
+        end
+
+        xlswrite(filename, Table, 'Data');
+
+        msgbox(['Data saved to ' filename]);
+    end
 end
 
 function ExportAccuracyTable(handles)
@@ -451,46 +465,78 @@ function ExportAccuracyTable(handles)
 
     selectedMethods = get(handles.selectedMethod, 'String');
     
-    for iMethod = 1: length(selectedMethods)
-    
-        data=MethodHistogram(iMethod);
+    filename = 'AccuracyTable.xlsx';
 
-        if ~iscell(data)
-            data = num2cell(data);
+    [filename,pathname]=uiputfile({'*.xlsx;*.xls', 'All supported files';'*.xlsx', 'Excel Workbook 2007';'*.xls', 'Excel Workbook 2003'},'Select Export File',filename);
+    if ~isequal(filename,0) && ~isequal(pathname,0)
+        rel_path = relativepath(pathname);
+        filename = strcat(rel_path, filename);
+
+        if exist(filename) 
+            delete(filename)
         end
 
+        for iMethod = 1: length(selectedMethods)
 
-        Table = [rowHeaders, data];
-        if size(columnHeaders, 2) >= size(Table, 2)
-            Header = columnHeaders(1,1:size(Table,2));
-            Table = [Header;Table];
+            data=MethodHistogram(iMethod);
+
+            if ~iscell(data)
+                data = num2cell(data);
+            end
+
+
+            Table = [rowHeaders, data];
+            if size(columnHeaders, 2) >= size(Table, 2)
+                Header = columnHeaders(1,1:size(Table,2));
+                Table = [Header;Table];
+            end
+
+            sheet = char(selectedMethods(iMethod));
+            xlswrite(filename, Table, sheet);
         end
-        filename = 'AccuracyTable.xlsx';
-        sheet = char(selectedMethods(iMethod));
-        xlswrite(filename,zeros(1000,1000)*NaN, sheet);
-        xlswrite(filename, Table, sheet);
+
+        msgbox(['Data saved to ' filename]);    
     end
-    
-    msgbox(['Data saved to ' filename]);    
 end
 
 function ExportGraph(handles)
-    h = figure;
-    PlotAccuracyGraph1(handles);
-    set(h, 'paperpositionmode','manual');
-    set(h, 'paperorientation','landscape');
-    set(h, 'paperunits','normalized');
-    set(h, 'paperposition',[0 0 1 1]);    
     filename = 'AccuracyGraph.png';
-    print(h, filename ,'-dpng');
-    close(h);
     
-    msgbox(['Graph saved to ' filename]);
+    [filename,pathname]=uiputfile({'*.png', 'PNG formatted image'},'Select Export File',filename);
+    if ~isequal(filename,0) && ~isequal(pathname,0)
+        rel_path = relativepath(pathname);
+        filename = strcat(rel_path, filename);
 
+        h = figure;
+        PlotAccuracyGraph1(handles);
+        xlabel('Fault Type', 'fontsize', 20);
+        ylabel('Accuracy %', 'fontsize', 20);
+        set(h, 'paperpositionmode','manual');
+        set(h, 'paperorientation','landscape');
+        set(h, 'paperunits','normalized');
+        set(h, 'paperposition',[0 0 1 1]);    
+        set(gca,'fontsize',20);
+
+        if exist(filename) 
+            delete(filename)
+        end
+
+        print(h, filename ,'-dpng');
+        close(h);
+
+        msgbox(['Graph saved to ' filename]);
+    end
 end
 
 
 % --- Executes during object creation, after setting all properties.
 function ProgressSlider_CreateFcn(hObject, eventdata, handles)
     SetDefaultBackgroundColor(hObject);
+end
+
+
+% --- Executes when selected object is changed in InputModeGroup.
+function InputModeGroup_SelectionChangeFcn(hObject, eventdata, handles)
+    ShowView(handles.optSinglePoint, handles.SinglePointPanel)
+    ShowView(handles.optDataset, handles.DatasetsPanel)
 end

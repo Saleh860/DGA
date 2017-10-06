@@ -181,49 +181,24 @@ elseif R1>5.5
 else
     STATE_ROGER=8;
 end
-%---------------------------------------------------------------
 
 if STATE_ROGER==1      % ROGER TYPE
-    DIG_R_MOD=0;
+    FAULT_ROGER=0;
 elseif STATE_ROGER==10   
-   DIG_R_MOD=2;
+   FAULT_ROGER=2;
 elseif STATE_ROGER==12 | STATE_ROGER==11 
-    DIG_R_MOD=3;
+    FAULT_ROGER=3;
 elseif STATE_ROGER>=4 & STATE_ROGER<=6
-    DIG_R_MOD=4;
+    FAULT_ROGER=4;
 elseif STATE_ROGER==7 | STATE_ROGER==8
-    DIG_R_MOD=5;
+    FAULT_ROGER=5;
 elseif STATE_ROGER==9
-    DIG_R_MOD=6;
+    FAULT_ROGER=6;
 elseif STATE_ROGER==3 | STATE_ROGER==13
-   DIG_R_MOD=1;
+   FAULT_ROGER=1;
 elseif STATE_ROGER==2
-    DIG_R_MOD=7;
+    FAULT_ROGER=7;
 else
 end
 
-
-if DIG_R_MOD==ACT
-   STATE_ROG_T=1;
-else
-    STATE_ROG_T=0;
-end
-if STATE_ROGER==1      % ROGER TYPE
-    DIG_R_MOD=0;
-elseif STATE_ROGER==10   
-   DIG_R_MOD=2;
-elseif STATE_ROGER==12 | STATE_ROGER==11 
-    DIG_R_MOD=3;
-elseif STATE_ROGER>=4 & STATE_ROGER<=6
-    DIG_R_MOD=4;
-elseif STATE_ROGER==7 | STATE_ROGER==8
-    DIG_R_MOD=5;
-elseif STATE_ROGER==9
-    DIG_R_MOD=6;
-elseif STATE_ROGER==3 | STATE_ROGER==13
-   DIG_R_MOD=1;
-elseif STATE_ROGER==2
-    DIG_R_MOD=7;
-end
-
-Diagnosis = DIG_R_MOD;
+Diagnosis = FAULT_ROGER;

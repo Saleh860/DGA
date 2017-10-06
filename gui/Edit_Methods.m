@@ -58,6 +58,10 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+
+LoadButtonImage(handles.pbRemoveMethod, './res/delete-button.jpg');
+LoadButtonImage(handles.pbAddMethod, './res/add-button.jpg');
+
 % UIWAIT makes Edit_Methods wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 %Read config file and fill in the methods list

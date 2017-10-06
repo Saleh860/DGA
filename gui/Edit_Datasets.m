@@ -58,6 +58,9 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+LoadButtonImage(handles.pbRemoveDataset, './res/delete-button.jpg');
+LoadButtonImage(handles.pbAddDataset, './res/add-button.jpg');
+
 % UIWAIT makes Edit_Datasets wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -68,8 +71,12 @@ global DGA_DatasetSelectedIndex;
 DGA_Datasets=DGA_Datasets(2:size(DGA_Datasets,1),:);
 set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
 set(handles.lbDatasets, 'Max', size(DGA_Datasets,1));
+set(handles.lbDatasets, 'UserData', false);
+
 DGA_DatasetSelectedIndex=0;
 LoadDatasetDetails(handles);
+
+
 
 
 % --- Outputs from this function are returned to the command line.
@@ -106,11 +113,29 @@ function LoadDatasetDetails(handles)
 function SaveDatasetDetails(handles)
     global DGA_Datasets;
     global DGA_DatasetSelectedIndex
+    modified = false;
     if DGA_DatasetSelectedIndex>0 && size(DGA_Datasets,1)>=DGA_DatasetSelectedIndex
-        DGA_Datasets(DGA_DatasetSelectedIndex, 2)=get(handles.tbDatasetName, 'String');
-        DGA_Datasets(DGA_DatasetSelectedIndex, 3)=get(handles.tbFileName, 'String');
-        DGA_Datasets(DGA_DatasetSelectedIndex, 4)={strjoin(get(handles.tbReference,'String')','\n')};
-        set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
+        if(DGA_Datasets(DGA_DatasetSelectedIndex, 2)~=get(handles.tbDatasetName, 'String'))
+            DGA_Datasets(DGA_DatasetSelectedIndex, 2)=get(handles.tbDatasetName, 'String');
+            modified=true;
+        end
+        
+        
+        if DGA_Datasets(DGA_DatasetSelectedIndex, 3)~=get(handles.tbFileName, 'String')
+            DGA_Datasets(DGA_DatasetSelectedIndex, 3)=get(handles.tbFileName, 'String');
+            modified = true;
+        end
+        
+        
+        if DGA_Datasets(DGA_DatasetSelectedIndex, 4)~={strjoin(get(handles.tbReference,'String')','\n')}
+            DGA_Datasets(DGA_DatasetSelectedIndex, 4)={strjoin(get(handles.tbReference,'String')','\n')};
+            modified - true;
+        end
+        
+        if modified 
+            set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
+            set(handles.lbDatasets, 'UserData', true);
+        end
     end
 
 
@@ -149,6 +174,7 @@ function pbAddDataset_Callback(hObject, eventdata, handles)
     DGA_Datasets(DGA_DatasetSelectedIndex,:)= {newID, 'New Dataset', 'Choose source file', ' '};
     set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
     set(handles.lbDatasets, 'Value', DGA_DatasetSelectedIndex);
+    set(handles.lbDatasets, 'UserData', true);
     LoadDatasetDetails(handles);
     
 
@@ -245,6 +271,7 @@ function pbRemoveDataset_Callback(hObject, eventdata, handles)
                 set(handles.lbDatasets, 'Value', DGA_DatasetSelectedIndex);
             end
             set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
+            set(handles.lbDatasets, 'UserData', true);
             LoadDatasetDetails(handles);
         end
     end
@@ -269,17 +296,18 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
     drawnow
     SaveDatasetDetails(handles);
     
-    response= questdlg('Do you want to save changes?');
-    if strcmp(response,'Yes')
-        xlswrite('Config.xlsx',zeros(1000,10)*NaN, 'Datasets');
-        xlswrite('Config.xlsx',[{'ID','Name','Filename','Reference'};DGA_Datasets], 'Datasets');
+    if get(handles.lbDatasets, 'UserData')
+        response= questdlg('Do you want to save changes?');
+        if strcmp(response,'Yes')
+            xlswrite('Config.xlsx',zeros(1000,10)*NaN, 'Datasets');
+            xlswrite('Config.xlsx',[{'ID','Name','Filename','Reference'};DGA_Datasets], 'Datasets');
+        end
+        if ~strcmp(response,'Cancel')
+            clear DGA_Datasets;
+            clear DGA_DatasetSelectedIndex;
+            delete(hObject);
+        end
     end
-    if ~strcmp(response,'Cancel')
-        clear DGA_Datasets;
-        clear DGA_DatasetSelectedIndex;
-        delete(hObject);
-    end
-
 
 % --- Executes on button press in pbClose.
 function pbClose_Callback(hObject, eventdata, handles)

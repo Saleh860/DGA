@@ -1,4 +1,4 @@
-
+%---------------------------------------------------------------
 % IEC RATIO METHOD
 R1I=c2h2/c2h4;  
 R2I=ch4/h2;
@@ -74,21 +74,22 @@ end
 %---------------------------------------------------------------
 
 if STATE_IEC==1      % IEC TYPE
-    DIG_IEC_MOD=0;
+    FAULT_IEC=0;
 elseif STATE_IEC==5   
-   DIG_IEC_MOD=2;
+   FAULT_IEC=2;
 elseif STATE_IEC==6
-    DIG_IEC_MOD=3;
+    FAULT_IEC=3;
 elseif STATE_IEC==7 | STATE_IEC==8 
-    DIG_IEC_MOD=4;
+    FAULT_IEC=4;
 elseif STATE_IEC==9
-    DIG_IEC_MOD=5;
+    FAULT_IEC=5;
 elseif STATE_IEC==10
-    DIG_IEC_MOD=6;
+    FAULT_IEC=6;
 elseif STATE_IEC==3 | STATE_IEC==4
-   DIG_IEC_MOD=1;
+   FAULT_IEC=1;
 elseif STATE_IEC==2
-    DIG_IEC_MOD=7;
+    FAULT_IEC=7;
+else
 end
 
-Diganosis  =DIG_IEC_MOD;
+Diagnosis = FAULT_IEC;
