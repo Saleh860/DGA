@@ -58,8 +58,8 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
-LoadButtonImage(handles.pbRemoveDataset, './res/delete-button.jpg');
-LoadButtonImage(handles.pbAddDataset, './res/add-button.jpg');
+LoadButtonImage(handles.pbRemoveDataset, './res/delete-button.jpg', 20, 20);
+LoadButtonImage(handles.pbAddDataset, './res/add-button.jpg', 20, 20);
 
 % UIWAIT makes Edit_Datasets wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -67,11 +67,14 @@ LoadButtonImage(handles.pbAddDataset, './res/add-button.jpg');
 %Read config file and fill in the methods list
 global DGA_Datasets;
 global DGA_DatasetSelectedIndex;
+global DGA_Datasets_Modified 
+
 [n,t,DGA_Datasets] = xlsread('Config.xlsx', 'Datasets');
 DGA_Datasets=DGA_Datasets(2:size(DGA_Datasets,1),:);
+DGA_Datasets_Modified= false;
+
 set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
 set(handles.lbDatasets, 'Max', size(DGA_Datasets,1));
-set(handles.lbDatasets, 'UserData', false);
 
 DGA_DatasetSelectedIndex=0;
 LoadDatasetDetails(handles);
@@ -99,7 +102,22 @@ function lbDatasets_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns lbDatasets contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from lbDatasets
 SaveDatasetDetails(handles);
-LoadDatasetDetails(handles);
+
+if length(get(handles.lbDatasets, 'Value'))<=1
+    LoadDatasetDetails(handles);
+else
+    ClearDatasetDetails(handles);
+end
+
+
+
+function ClearDatasetDetails(handles)
+    global DGA_DatasetSelectedIndex
+    DGA_DatasetSelectedIndex=0;
+    set(handles.tbDatasetName, 'String', '');
+    set(handles.tbFileName, 'String', '');
+    set(handles.tbReference,'String', '');     
+
 
 function LoadDatasetDetails(handles)
     global DGA_Datasets;
@@ -109,32 +127,41 @@ function LoadDatasetDetails(handles)
     set(handles.tbFileName, 'String', DGA_Datasets(DGA_DatasetSelectedIndex, 3));
     set(handles.tbReference,'String', DGA_Datasets(DGA_DatasetSelectedIndex, 4));     
 
-
+    
 function SaveDatasetDetails(handles)
     global DGA_Datasets;
     global DGA_DatasetSelectedIndex
+    global DGA_Datasets_Modified;
+    
     modified = false;
-    if DGA_DatasetSelectedIndex>0 && size(DGA_Datasets,1)>=DGA_DatasetSelectedIndex
-        if(DGA_Datasets(DGA_DatasetSelectedIndex, 2)~=get(handles.tbDatasetName, 'String'))
-            DGA_Datasets(DGA_DatasetSelectedIndex, 2)=get(handles.tbDatasetName, 'String');
+    if DGA_DatasetSelectedIndex>0 && ...
+            size(DGA_Datasets,1)>=DGA_DatasetSelectedIndex
+        if ~strcmp(DGA_Datasets(DGA_DatasetSelectedIndex, 2), ...
+                get(handles.tbDatasetName, 'String'))
+            DGA_Datasets(DGA_DatasetSelectedIndex, 2)= ...
+                get(handles.tbDatasetName, 'String');
             modified=true;
         end
         
         
-        if DGA_Datasets(DGA_DatasetSelectedIndex, 3)~=get(handles.tbFileName, 'String')
-            DGA_Datasets(DGA_DatasetSelectedIndex, 3)=get(handles.tbFileName, 'String');
+        if ~strcmp(DGA_Datasets(DGA_DatasetSelectedIndex, 3), ...
+                get(handles.tbFileName, 'String'))
+            DGA_Datasets(DGA_DatasetSelectedIndex, 3)= ...
+                get(handles.tbFileName, 'String');
             modified = true;
         end
         
         
-        if DGA_Datasets(DGA_DatasetSelectedIndex, 4)~={strjoin(get(handles.tbReference,'String')','\n')}
-            DGA_Datasets(DGA_DatasetSelectedIndex, 4)={strjoin(get(handles.tbReference,'String')','\n')};
-            modified - true;
+        if ~strcmp(DGA_Datasets(DGA_DatasetSelectedIndex, 4), ...
+                {strjoin(get(handles.tbReference,'String')','\n')})
+            DGA_Datasets(DGA_DatasetSelectedIndex, 4)= ...
+                {strjoin(get(handles.tbReference,'String')','\n')};
+            modified = true;
         end
         
         if modified 
             set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
-            set(handles.lbDatasets, 'UserData', true);
+            DGA_Datasets_Modified= true;
         end
     end
 
@@ -160,6 +187,7 @@ function pbAddDataset_Callback(hObject, eventdata, handles)
 
     global DGA_Datasets;
     global DGA_DatasetSelectedIndex;
+    global DGA_Datasets_Modified;
     
     SaveDatasetDetails(handles);
     
@@ -172,9 +200,11 @@ function pbAddDataset_Callback(hObject, eventdata, handles)
     
     DGA_DatasetSelectedIndex=size(DGA_Datasets,1)+1;
     DGA_Datasets(DGA_DatasetSelectedIndex,:)= {newID, 'New Dataset', 'Choose source file', ' '};
+    DGA_Datasets_Modified = true;
+    
     set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
     set(handles.lbDatasets, 'Value', DGA_DatasetSelectedIndex);
-    set(handles.lbDatasets, 'UserData', true);
+    
     LoadDatasetDetails(handles);
     
 
@@ -258,10 +288,12 @@ function pbRemoveDataset_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     global DGA_Datasets;
     global DGA_DatasetSelectedIndex;
+    global DGA_Datasets_Modified;
     
     if size(DGA_Datasets,1)>=1
         DGA_DatasetSelectedIndex=get(handles.lbDatasets, 'Value');
         DGA_Datasets(DGA_DatasetSelectedIndex,:)= [];
+        DGA_Datasets_Modified= true;
 
         if size(DGA_Datasets,1)==0
             pbAddDataset_Callback(hObject, eventdata, handles)
@@ -271,7 +303,6 @@ function pbRemoveDataset_Callback(hObject, eventdata, handles)
                 set(handles.lbDatasets, 'Value', DGA_DatasetSelectedIndex);
             end
             set(handles.lbDatasets, 'String', DGA_Datasets(:,2));
-            set(handles.lbDatasets, 'UserData', true);
             LoadDatasetDetails(handles);
         end
     end
@@ -290,23 +321,33 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global DGA_Datasets;
-    global DGA_DatasetSelectedIndex;
+    try
+        global DGA_Datasets;
+        global DGA_DatasetSelectedIndex;
+        global DGA_Datasets_Modified;
 
-    drawnow
-    SaveDatasetDetails(handles);
-    
-    if get(handles.lbDatasets, 'UserData')
-        response= questdlg('Do you want to save changes?');
-        if strcmp(response,'Yes')
-            xlswrite('Config.xlsx',zeros(1000,10)*NaN, 'Datasets');
-            xlswrite('Config.xlsx',[{'ID','Name','Filename','Reference'};DGA_Datasets], 'Datasets');
-        end
-        if ~strcmp(response,'Cancel')
-            clear DGA_Datasets;
-            clear DGA_DatasetSelectedIndex;
+        drawnow
+        SaveDatasetDetails(handles);
+
+        if DGA_Datasets_Modified
+            response= questdlg('Do you want to save changes?');
+            if strcmp(response,'Yes')
+                xlswrite('Config.xlsx',zeros(1000,10)*NaN, 'Datasets');
+                xlswrite('Config.xlsx',[{'ID','Name','Filename','Reference'};DGA_Datasets], 'Datasets');
+            end
+            if ~strcmp(response,'Cancel')
+                clear DGA_Datasets;
+                clear DGA_DatasetSelectedIndex;
+                clear DGA_Datasets_Modified;
+
+                delete(hObject);
+            end
+        else
             delete(hObject);
         end
+    catch error
+        display('Sorry! An error occured while closing the Edit_Datasets figure. Any changes may have been lost!')
+        delete(hObject);
     end
 
 % --- Executes on button press in pbClose.
