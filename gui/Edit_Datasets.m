@@ -253,6 +253,9 @@ function pbBrowse_Callback(hObject, eventdata, handles)
 [filename,pathname]=uigetfile({'.xlsx'},'Select Input File (*.xlsx)');
 if ~isequal(filename,0) && ~isequal(pathname,0)
     rel_path = relativepath(pathname);
+    if rel_path(end)~='\'
+        rel_path = strcat(rel_path, '\');
+    end
     fullname = strcat(rel_path, filename);
     set(handles.tbFileName,'String',{fullname});
 end

@@ -22,7 +22,7 @@ function varargout = DGA_UI(varargin)
 
     % Edit the above text to modify the response to help DGA_UI
 
-    % Last Modified by GUIDE v2.5 07-Oct-2017 08:44:43
+    % Last Modified by GUIDE v2.5 18-Oct-2017 02:32:40
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -289,10 +289,18 @@ function DatasetDiagnosis(handles)
         FullColumns = find(~isnan(ratios(1,:)));
 
         selectedMethods = methods(get(handles.MethodList, 'Value'),2);
-        SetDiagnosisTableHeader(handles,[Input(FullColumns); 'ACT'; selectedMethods]);
-        SetDiagnosisTableData(handles, ...
-            [num2cell(ratios(:,FullColumns)) symbolicActual symbolicResults]);
-
+        
+        %If actual doesn't exist at all, hide the ACT column
+        if all(actual==7)
+            SetDiagnosisTableHeader(handles,[Input(FullColumns); selectedMethods]);
+            SetDiagnosisTableData(handles, ...
+                [num2cell(ratios(:,FullColumns)) symbolicResults]);
+        else
+            SetDiagnosisTableHeader(handles,[Input(FullColumns); 'ACT'; selectedMethods]);
+            SetDiagnosisTableData(handles, ...
+                [num2cell(ratios(:,FullColumns)) symbolicActual symbolicResults]);
+        end
+        
         DGA_histogram = AnalyzeResults(results, actual);
 
         axes(handles.AccuracyGraph);
@@ -321,12 +329,13 @@ function PlotAccuracyGraph(handles)
     grid on;
 
     set(gca,'XTickLabel', ...
-        {'PD','D1','D2','T1','T2','T3','Overall'});
+        {'PD','D1','D2','T1','T2','T3','All'});
 
     ylim([0 100]);    
 
     legend( methods(get(handles.MethodList, 'Value'),2), ...
-        'Location','northoutside','Orientation','horizontal');
+        'Location','eastoutside','Orientation','vertical', ...
+        'Interpreter', 'none');
 end
 
 % --- helper function to show/hid an object based on the value of another    
@@ -423,8 +432,12 @@ function ExportView(handles, filename, filter, exportFun)
     [filename,pathname]=uiputfile(filter,'Select Export File',filename);
     if ~isequal(filename,0) && ~isequal(pathname,0)
         rel_path = relativepath(pathname);
+        if rel_path(end)~='\'
+            rel_path = strcat(rel_path, '\');
+        end
         filename = strcat(rel_path, filename);
-        if exist(filename) 
+        
+        if exist(filename,'file') 
             delete(filename)
         end
 
@@ -483,12 +496,13 @@ function ExportAccuracyGraph(handles, filename)
 
     h = figure;
     PlotAccuracyGraph(handles);
-    xlabel('Fault Type', 'fontsize', 20);
-    ylabel('Accuracy %', 'fontsize', 20);
+    xlabel('Fault Type', 'fontsize', 28);
+    ylabel('Accuracy %', 'fontsize', 28);
+    set(h, 'papersize', [16 12]);
     set(h, 'paperpositionmode','manual');
-    set(h, 'paperorientation','landscape');
+    set(h, 'paperorientation','portrait');
     set(h, 'paperunits','normalized');
-    set(h, 'paperposition',[0 0 1 1]);    
+    set(h, 'paperposition',[0.25 0.25 1.2 0.6]); 
     set(gca,'fontsize',20);
 
     print(h, filename ,'-dpng');
