@@ -1,18 +1,25 @@
 % update_progress_callback(maximum, current)
-function Diagnosis = DGAs_n (methods, ratios_List, update_progress_callback)
-    num_methods = length(methods);
+function [Diagnosis,Canceled] = DGAs_n (methods, ratios_List, update_progress_callback)
+    num_methods = length(methods(:,3));
     num_samples = size(ratios_List,1);
     Diagnosis = zeros(num_samples,num_methods);
     progress = 0;
+    Canceled = false;
     for method=1:num_methods
         if nargin > 2
-            Diagnosis(:,method)= ...
-                DGA_n(cell2mat(methods(method)), ratios_List, ...
+            [Diagnosis(:,method), C] = ...
+                DGA_n(cell2mat(methods(method,3)), ratios_List, ...
                 @(p) update_progress_callback(num_samples*num_methods, ...
-                                            p+progress));
+                    p+progress ...
+                    ,['Applying ',char(methods(method,2)), '...'] ...
+                    ));
+                if C
+                    Canceled = true;
+                    return
+                end
         else
               Diagnosis(:,method)= ...
-                DGA_n(cell2mat(methods(method)), ratios_List);
+                DGA_n(cell2mat(methods(method,3)), ratios_List);
         end
         
         progress = progress + num_samples;
@@ -20,14 +27,18 @@ function Diagnosis = DGAs_n (methods, ratios_List, update_progress_callback)
 end
 
 % update_progress_callback(current)
-function Diagnosis = DGA_n (method, ratios_List, update_progress_callback)
+function [Diagnosis, Canceled] = DGA_n (method, ratios_List, update_progress_callback)
     num_samples = size(ratios_List,1);
     Diagnosis = zeros(num_samples,1);
     progress = 0;
+    Canceled = false;
     for sample_row=1:num_samples
         progress = progress + 1;
         if nargin >2 
-            update_progress_callback(progress);
+            if update_progress_callback(progress)
+                Canceled=true;
+                return
+            end
         end
         
         Diagnosis(sample_row)=DGA_1(method, ratios_List(sample_row,:));

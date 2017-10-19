@@ -284,41 +284,37 @@ function DatasetDiagnosis(handles)
         if ishandle(hProgressBar)
             delete(hProgressBar);
         end
+
+        symbolicResults=arrayfun(@(x) DGA_Diagnosis(x),results,'UniformOutput',false);
+
+        symbolicActual = arrayfun(@(x) DGA_Diagnosis(x),actual,'UniformOutput',false);
+
+        FullColumns = find(~isnan(ratios(1,:)));
+
+        selectedMethods = methods(get(handles.MethodList, 'Value'),2);
         
-        if ~Canceled
-            symbolicResults=arrayfun(@(x) DGA_Diagnosis(x),results,'UniformOutput',false);
-
-            symbolicActual = arrayfun(@(x) DGA_Diagnosis(x),actual,'UniformOutput',false);
-
-            FullColumns = find(~isnan(ratios(1,:)));
-
-            selectedMethods = methods(get(handles.MethodList, 'Value'),2);
-
-            %If actual doesn't exist at all, hide the ACT column
-            if all(actual==7)
-                SetDiagnosisTableHeader(handles,[Input(FullColumns); selectedMethods]);
-                SetDiagnosisTableData(handles, ...
-                    [num2cell(ratios(:,FullColumns)) symbolicResults]);
-            else
-                SetDiagnosisTableHeader(handles,[Input(FullColumns); 'ACT'; selectedMethods]);
-                SetDiagnosisTableData(handles, ...
-                    [num2cell(ratios(:,FullColumns)) symbolicActual symbolicResults]);
-            end
-
-            DGA_histogram = AnalyzeResults(results, actual);
-
-            axes(handles.AccuracyGraph);
-            PlotAccuracyGraph(handles);
-
-            set(handles.selectedMethod, 'String', selectedMethods);
-            set(handles.selectedMethod, 'Value', 1);
-            ShowSelectedView(handles);
-            ShowSelectedMethodAnalysisResults(handles);
+        %If actual doesn't exist at all, hide the ACT column
+        if all(actual==7)
+            SetDiagnosisTableHeader(handles,[Input(FullColumns); selectedMethods]);
+            SetDiagnosisTableData(handles, ...
+                [num2cell(ratios(:,FullColumns)) symbolicResults]);
         else
-            msgbox('Operation canceled!', 'WindowStyle', 'modal');
-        end            
+            SetDiagnosisTableHeader(handles,[Input(FullColumns); 'ACT'; selectedMethods]);
+            SetDiagnosisTableData(handles, ...
+                [num2cell(ratios(:,FullColumns)) symbolicActual symbolicResults]);
+        end
+        
+        DGA_histogram = AnalyzeResults(results, actual);
+
+        axes(handles.AccuracyGraph);
+        PlotAccuracyGraph(handles);
+
+        set(handles.selectedMethod, 'String', selectedMethods);
+        set(handles.selectedMethod, 'Value', 1);
+        ShowSelectedView(handles);
+        ShowSelectedMethodAnalysisResults(handles);
     else
-        msgbox('Can''t find any data to analyse!', 'WindowStyle', 'modal');
+        uiwait(msgbox('Can''t find any data to analyse!'));
     end
 end
     
@@ -450,7 +446,7 @@ function ExportView(handles, filename, filter, exportFun)
 
         exportFun(handles, filename);
 
-        msgbox(['View saved to ' filename], 'WindowStyle', 'modal');
+        uiwait(msgbox(['View saved to ' filename]));
     end
 end
 
