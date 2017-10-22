@@ -5,5 +5,10 @@
 %and all its subfolders to the search path
 old_path=addpath(genpath(fileparts(which('DGA'))));
 
+%For Octave compatibility
+if ~exist('xlsread')
+  pkg load io
+end
+
 %invoke the gui
-DGA_UI
+DGALab
