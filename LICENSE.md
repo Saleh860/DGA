@@ -9,7 +9,7 @@ Sherif S. M. Ghoneim, Taif University, Suez University
 This work is provided under the CC BY-NC 4.0 License
 https://creativecommons.org/licenses/by-nc/4.0/
 
-If you intend to use this software for a commercial purpose, you need legal permission from the authors as well as Taif University. 
+If you intend to use this software for a commercial purpose, you need legal permission from all authors as well as Taif University. 
 
 
 
