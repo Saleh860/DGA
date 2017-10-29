@@ -1,11 +1,17 @@
 The DGA Software Package is developed by the following authors:
 
-Ibrahim B. M. Taha, Tanta University
-Saleh I. M. Ibrahim, Cairo University 
-Sherif S. M. Ghoneim, Suez University
+Ibrahim B. M. Taha, Taif University, Tanta University
+
+Saleh I. M. Ibrahim, Taif University, Cairo University 
+
+Sherif S. M. Ghoneim, Taif University, Suez University
 
 This work is provided under the CC BY-NC 4.0 License
 https://creativecommons.org/licenses/by-nc/4.0/
+
+If you intend to use this software for a commercial purpose, you need legal permission from the authors as well as Taif University. 
+
+
 
 Creative Commons Attribution-NonCommercial 4.0 International Public License
 
