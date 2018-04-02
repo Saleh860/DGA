@@ -22,7 +22,7 @@ function varargout = DGA_UI(varargin)
 
     % Edit the above text to modify the response to help DGA_UI
 
-    % Last Modified by GUIDE v2.5 18-Oct-2017 02:32:40
+    % Last Modified by GUIDE v2.5 02-Apr-2018 21:28:58
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -532,3 +532,6 @@ function Canceled=UpdateProgressSlider(handle, maximum, current, message)
 %    set(handle, 'Slider', [0.01; max(0.01, 100*(current/maximum)^6)]);
     drawnow
 end
+
+
+
