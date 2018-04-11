@@ -5,20 +5,20 @@ using namespace std;
 int main()
 {
 
-	double ratios[9];
+	double ppms[9];
 	char str[1024];
 
 	for (int i = 0; i < 9; i++)
 	{
 		cin.getline(str, 1024);
-		ratios[i]=atof(str);
+		ppms[i]=atof(str);
 	}
 
 	int Diagnosis = 7;
 
-	double h2 = ratios[0], ch4 = ratios[1], c2h6 = ratios[2],
-		   c2h4 = ratios[3], c2h2 = ratios[4], co = ratios[5],
-		   co2 = ratios[6], n2 = ratios[7], o2 = ratios[8];
+	double h2 = ppms[0], ch4 = ppms[1], c2h6 = ppms[2],
+		   c2h4 = ppms[3], c2h2 = ppms[4], co = ppms[5],
+		   co2 = ppms[6], n2 = ppms[7], o2 = ppms[8];
 
 	double R1 = (ch4 / (ch4 + c2h4 + c2h2)) * 100;
 	double R2 = (c2h4 / (ch4 + c2h4 + c2h2)) * 100;

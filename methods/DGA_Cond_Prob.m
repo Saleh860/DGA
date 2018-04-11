@@ -1,15 +1,32 @@
+%Input:
+%------
+%The input is the gas concentrations stored in a vector named 'ppms' 
+%and stored again in the following nine variables:
+%h2=ppms(1);ch4=ppms(2);c2h6=ppms(3);c2h4=ppms(4);c2h2=ppms(5);
+%co=ppms(6);co2=ppms(7);n2=ppms(8);o2=ppms(9);
+%Note that unused gas concentrations take the value -1
 
-    ratios(1)=ratios(1)/(sum(ratios((1:5))));
-    ratios(2)=ratios(2)/(sum(ratios((1:5))));
-    ratios(3)=ratios(3)/(sum(ratios((1:5))));
-    ratios(4)=ratios(4)/(sum(ratios((1:5))));
-    ratios(5)=ratios(5)/(sum(ratios((1:5))));
+% Analysis
+%---------
+% Implement your fault diagnosis method here 
+
+%Output:
+%-------
+% set 'Diagnosis' variable to a number between 0 and 7 representing the 
+% fault code resulting from your analysis method 
+% {0=NF,1=PD,2=D1,3=D2,4=T1,5=T2,6=T3,7=UD}
+
+    ppms(1)=ppms(1)/(sum(ppms((1:5))));
+    ppms(2)=ppms(2)/(sum(ppms((1:5))));
+    ppms(3)=ppms(3)/(sum(ppms((1:5))));
+    ppms(4)=ppms(4)/(sum(ppms((1:5))));
+    ppms(5)=ppms(5)/(sum(ppms((1:5))));
 
     MEAN_STD_PD_AR_TH_D1_D2_T1_T2_T3_323         % MEAN AND STD
 
     N_T1_F=0;     N_T2_F=0;   N_T3_F=0; N_D1_F=0;     N_D2_F=0;   N_PD_F=0;
            
-           X=ratios(1:5);           
+           X=ppms(1:5);           
            
            N_PD=mvnpdf(X,PD(1,(1:5)),PD(2,(1:5)))/mvnpdf(X,PD(1,(6:10)),PD(2,(6:10))); 
            N_AR=mvnpdf(X,AR(1,(1:5)),AR(2,(1:5)))/mvnpdf(X,AR(1,(6:10)),AR(2,(6:10))); 
