@@ -49,6 +49,10 @@ function Diagnosis = DGA_1 (method, ppms_)
     ppms=-1*ones(1,9);
     ppms(1:size(ppms_,2))=ppms_(1:size(ppms_,2));
     ppms(isnan(ppms))=-1;
+    %Assume diagnosed fault is "undefined", i.e. 7
+    %If the invoked method doesn't set a specific
+    %diagnosis code, the default is 7
+    Diagnosis = 7;
     try
         if ~isempty(strfind(lower(method), '.exe'))
             InFile = 'ppms.txt';
@@ -70,11 +74,9 @@ function Diagnosis = DGA_1 (method, ppms_)
             cmd='run(method);';
             eval(cmd);
         else
-        display(strcat('Error attempting to calculate : ', method))
-            Diagnosis=7;
+            display(strcat('Error attempting to calculate : ', method))
         end
     catch e
         display(strcat('Error attempting to calculate : ', method))
-        Diagnosis = 7;
     end
 end
